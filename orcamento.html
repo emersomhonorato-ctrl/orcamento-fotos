@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Orçamento</title>
+    <!-- Biblioteca para gerar PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background: #f0f0f0; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #333; }
+        .status { margin-top: 20px; padding: 10px; background: #e8f5e9; color: #2e7d32; border-radius: 4px; display: none; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; font-size: 16px; }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Gerador de Orçamento Fotográfico</h1>
+    <p>Este sistema lê os dados da URL e gera o PDF.</p>
+    
+    <div id="dados-exibidos">
+        <p><strong>Cliente:</strong> <span id="display-cliente">Carregando...</span></p>
+        <p><strong>Serviço:</strong> <span id="display-servico">Carregando...</span></p>
+        <p><strong>Valor:</strong> <span id="display-valor">Carregando...</span></p>
+    </div>
+
+    <br>
+    <button onclick="gerarPDF()">Baixar PDF do Orçamento</button>
+    <div id="msg-sucesso" class="status">PDF gerado com sucesso!</div>
+</div>
+
+<script>
+    // 1. Função para ler os dados da URL (Query Parameters)
+    function getParams() {
+        const urlParams = new URLSearchParams(window.location.search);
+        return {
+            cliente: urlParams.get('cliente') || 'Cliente Sem Nome',
+            servico: urlParams.get('servico') || 'Ensaio Fotográfico',
+            valor: urlParams.get('valor') || 'R$ 0,00',
+            data: new Date().toLocaleDateString('pt-BR')
+        };
+    }
+
+    // 2. Preencher a tela com os dados
+    const dados = getParams();
+    document.getElementById('display-cliente').innerText = dados.cliente;
+    document.getElementById('display-servico').innerText = dados.servico;
+    document.getElementById('display-valor').innerText = dados.valor;
+
+    // 3. Função para Gerar o PDF
+    async function gerarPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        // Cabeçalho
+        doc.setFontSize(22);
+        doc.setTextColor(40);
+        doc.text("ORÇAMENTO FOTOGRÁFICO", 20, 20);
+
+        // Dados do Cliente
+        doc.setFontSize(12);
+        doc.setTextColor(100);
+        doc.text(`Data: ${dados.data}`, 20, 30);
+        
+        doc.setLineWidth(0.5);
+        doc.line(20, 35, 190, 35);
+
+        // Corpo do Orçamento
+        doc.setFontSize(14);
+        doc.setTextColor(0);
+        doc.text(`Cliente: ${dados.cliente}`, 20, 50);
+        doc.text(`Serviço Contratado: ${dados.servico}`, 20, 60);
+        
+        doc.setFontSize(16);
+        doc.setTextColor(0, 100, 0); // Verde
+        doc.text(`Valor Total: ${dados.valor}`, 20, 80);
+
+        // Rodapé / Termos
+        doc.setFontSize(10);
+        doc.setTextColor(150);
+        doc.text("Este orçamento é válido por 15 dias.", 20, 120);
+        doc.text("Atenciosamente, Seu Nome Fotografia.", 20, 130);
+
+        // Salvar o arquivo
+        doc.save(`Orcamento_${dados.cliente}.pdf`);
+        
+        document.getElementById('msg-sucesso').style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
